@@ -17,9 +17,8 @@ exports.sendEmail = (subject, body) => {
         to: process.env.MAIL_TO,
         subject: process.env.ENVNAME+subject,
         html: '<!DOCTYPE html>'+
-              '<html><head><title>Funds</title></head>'+
+              '<html><head><title>IKP</title></head>'+
               '<body>'+
-              '<h4>Funds</h4>'+
               '<pre>'+body+'</pre>'+
               '</body></html>'
     };

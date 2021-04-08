@@ -3,14 +3,19 @@ const email = require("./email")
 
 const baseurl = 'https://pacjent.erejestracja.ezdrowie.gov.pl'
 const prescriptionId = "21594a8e-cd9b-46a9-8d5a-d280c52a1695"
-const servicePointId = "f9189652-3e86-46b1-9131-54cc51ba9ace" //EMC Instytut Medyczny Pilczycka 144-148
+
 var Confirmed = false
 
 exports.IKPConfirm = (id, patient_sid, x_csrf_token) => {
+    
     let path = '/api/calendarSlots/calendarSlot/'+id+'/confirm'
     let postbody = JSON.stringify(
         {"prescriptionId": prescriptionId}
     )
+    console.log('IKPConfirm', id, patient_sid, x_csrf_token)
+    Confirmed = true
+    this.IKPSendEmail('Reserved/status:'+Confirmed, id+'/'+prescriptionId+', this.Confirmed='+Confirmed)
+    return
     return new Promise((resolve) => {
         const client = http2.connect(baseurl);
         const request = client.request({
@@ -76,7 +81,7 @@ exports.IKPFindVaccine = (dateTo, patient_sid, x_csrf_token) => {
                     "from": dateFrom,
                     "to": dateTo
                 },
-                "geoId": "0264029",
+                "geoId": "0264029" /*WRO-FAB*/, //"0264011" /*WRO*/, 
                 "prescriptionId": prescriptionId,
                 //"servicePointId": servicePointId,
                 "voiId": "02",
@@ -141,27 +146,6 @@ exports.IKPFindVaccine = (dateTo, patient_sid, x_csrf_token) => {
     })
 }
 
-exports.IKPSendEmail = (response) => {
-    let msg
-    if (response.list && response.list.length > 0) {
-        msg = response.list.map(list => ({
-            id: list.id,
-            startAt: new Date(new Date(list.startAt).getTime() + 2*60*60*1000),
-            name: list.servicePoint.name,
-            addressText: list.servicePoint.addressText,
-            vaccineType: list.vaccineType,
-        }))
-        
-        let found = response.list.find(list => list.servicePoint.id === servicePointId)
-        let txt = 'Not found'
-        if (found !== undefined) {
-            txt = 'Found:'+JSON.stringify(found, ' ', 2)
-            //@@@if found ...
-        }
-        msg = response.list
-        email.sendEmail('-IKP '+new Date(), txt+"\n\n\n"+JSON.stringify(msg, ' ', 2))
-
-    } else {
-        email.sendEmail('-IKP '+new Date(), 'Not found')
-    }
+exports.IKPSendEmail = (title, text) => {
+    email.sendEmail('-IKP '+title+' '+new Date(), text)    
 }
