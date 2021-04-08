@@ -2,8 +2,8 @@ const express = require('express')
 const app = express()
 const ikp = require("./ikp")
 
-app.get('/home',  (req, res, next) => {
-    res.json('ok')
+app.get('/',  (req, res, next) => {
+    res.json('IKP covid-19 vaccine robot homepage')
 })
 
 app.get('/covid-vaccine/:date_to/:patient_id/:x_csrf_token', (req, res, next) => {
